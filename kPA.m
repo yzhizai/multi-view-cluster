@@ -30,9 +30,11 @@ end
 
 X_perm_cell = reshape(mat2cell(X_perm, ob_no, pa_no, ones(1, p + 1)), p + 1, 1);
 
-q_sigma = zeros(numel(sigma_rang), 1);
-E_sigma = zeros(numel(sigma_rang), 1);
+q_sigma = zeros(numel(sigma_range), 1);
+E_sigma = zeros(numel(sigma_range), 1);
+ee = 1;
 for cc = sigma_range
+    
    [~, ~, eigVal]  = cellfun(@(x) kPCA(x, 10, 'gaussian', cc), X_perm_cell, 'UniformOutput', false);
    eigVal = cat(3, eigVal{:});
    eigVal_r = real(reshape(eigVal, ob_no, []));
@@ -46,12 +48,24 @@ for cc = sigma_range
        perc_val(dd) = temp_sort(46);
    end
    eigVal_orig = eigVal_head10(:, 1);
-   
-   contra_orig_perm = eigVal_orig - perc_val;
+   figure
+   plot(eigVal_orig)
+   hold on
+   plot(perc_val)
+   hold off
+   contra_orig_perm = eigVal_orig - perc_val';
    L_inx = find(contra_orig_perm < 0);
-   q_sigma(cc) = L_inx(1);
-   E_sigma(cc) = sum(L_inx(1:q_sigma(cc) - 1)); % to calculate the signal energy corresponding to sigma value.
+   if ~isempty(L_inx)
+       q_sigma(ee) = L_inx(1) - 1;
+   else
+       q_sigma(ee) = 10;
+   end
+   
+   E_sigma(ee) = sum(contra_orig_perm(1:q_sigma(ee) - 1)); % to calculate the signal energy corresponding to sigma value.
+   ee = ee + 1;
 end
+figure
+plot(sigma_range, E_sigma)
 
 [~, idx] = max(E_sigma);
 

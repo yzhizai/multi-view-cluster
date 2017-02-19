@@ -9,7 +9,14 @@ function Y = kPA(X, p, sigma_range)
 %  X - the observation matrix with rows represent the observation, and
 %  columns represent the features.
 %  p - the number of replicas to generate the 95 percentile.
-%  sigm
+%  sigma_range -  the range of sigma to choose from.
+%Output:
+%  Y - the results same to the output of kPCA function, it is the componts
+%  wanted.
+%
+%Institute of High Energy
+%Shaofeng Duan
+%2017-2-19
 X_perm = X;
 [ob_no, pa_no] = size(X);
 for aa = 1:p
@@ -23,8 +30,8 @@ end
 
 X_perm_cell = reshape(mat2cell(X_perm, ob_no, pa_no, ones(1, p + 1)), p + 1, 1);
 
-q_sigma = zeros(numel(sigma_rang), 1);
-E_sigma = zeros(numel(sigma_rang), 1);
+q_sigma = zeros(numel(sigma_range), 1);
+E_sigma = zeros(numel(sigma_range), 1);
 for cc = sigma_range
    [~, ~, eigVal]  = cellfun(@(x) kPCA(x, 10, 'gaussian', cc), X_perm_cell, 'UniformOutput', false);
    eigVal = cat(3, eigVal{:});
@@ -40,11 +47,13 @@ for cc = sigma_range
    end
    eigVal_orig = eigVal_head10(:, 1);
    
-   contra_orig_perm = eigVal_orig - perc_val;
+   contra_orig_perm = eigVal_orig - perc_val';
    L_inx = find(contra_orig_perm < 0);
-   q_sigma(cc) = L_inx(1);
-   E_sigma(cc) = sum(L_inx(1:q_sigma(cc) - 1)); % to calculate the signal energy corresponding to sigma value.
+   q_sigma(cc) = L_inx(1) - 1;
+   E_sigma(cc) = sum(contra_orig_perm(1:q_sigma(cc) - 1)); % to calculate the signal energy corresponding to sigma value.
 end
+figure
+plot(E_sigma)
 
 [~, idx] = max(E_sigma);
 
