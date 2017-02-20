@@ -1,6 +1,6 @@
 function Y = kPA(X, p, sigma_range)
 %Usage: Y = KPA(X, p, sigma_range)
-% kPA is the algorithm following the paper:Jorgensen, K.W., Hansen, L.K., 2012. Model selection for gaussian kernel PCA denoising.
+%kPA is the algorithm following the paper:Jorgensen, K.W., Hansen, L.K., 2012. Model selection for gaussian kernel PCA denoising.
 %which is used to select the appropriate parameters for kPCA with guassian
 %kernel. The parameters include the guassian sigma and number of
 %components.
@@ -34,10 +34,9 @@ q_sigma = zeros(numel(sigma_range), 1);
 E_sigma = zeros(numel(sigma_range), 1);
 ee = 1;
 for cc = sigma_range
-    
+   % calculate each X and its replicas kPCA
    [~, ~, eigVal]  = cellfun(@(x) kPCA(x, 10, 'gaussian', cc), X_perm_cell, 'UniformOutput', false);
-   eigVal = cat(3, eigVal{:});
-   eigVal_r = real(reshape(eigVal, ob_no, []));
+   eigVal_r = real(cat(2, eigVal{:}));
    eigVal_head10 = eigVal_r(1:10, :);
    perc_95 = eigVal_head10(:, 2:end);
 
